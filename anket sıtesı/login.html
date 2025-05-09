@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giriş - Online Anket/Poll Sistemi</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .login-container {
+            max-width: 400px;
+            margin: 4rem auto;
+            padding: 2rem;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #1a73e8;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        .login-btn:hover {
+            background-color: #1557b0;
+        }
+
+        .register-link {
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .register-link a {
+            color: #1a73e8;
+            text-decoration: none;
+        }
+
+        .register-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">Online Anket/Poll Sistemi</div>
+        <div class="nav-buttons">
+            <button class="btn btn-secondary" onclick="window.location.href='index.html'">Ana Sayfa</button>
+        </div>
+    </nav>
+
+    <div class="login-container">
+        <h2 style="text-align: center; margin-bottom: 2rem;">Giriş Yap</h2>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">E-posta</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Şifre</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <button type="submit" class="login-btn">Giriş Yap</button>
+        </form>
+        <div class="register-link">
+            Hesabınız yok mu? <a href="register.html">Kayıt Olun</a>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            // Ad bilgisini localStorage'dan tekrar kaydet (kayıt olurken kaydedilmişti)
+            const userName = localStorage.getItem('userName') || '';
+            localStorage.setItem('userName', userName);
+            // Burada giriş işlemleri yapılacak
+            console.log('Giriş denemesi:', { email, password });
+            alert('Giriş başarılı!');
+            window.location.href = 'dashboard.html'; // Kullanıcı paneline yönlendirme
+        });
+    </script>
+</body>
+</html> 

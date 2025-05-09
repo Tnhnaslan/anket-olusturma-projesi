@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kayıt Ol - Online Anket/Poll Sistemi</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .register-container {
+            max-width: 400px;
+            margin: 4rem auto;
+            padding: 2rem;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #1a73e8;
+        }
+
+        .register-btn {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        .register-btn:hover {
+            background-color: #1557b0;
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .login-link a {
+            color: #1a73e8;
+            text-decoration: none;
+        }
+
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+
+        .form-group input.error {
+            border-color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">Online Anket/Poll Sistemi</div>
+        <div class="nav-buttons">
+            <button class="btn btn-secondary" onclick="window.location.href='index.html'">Ana Sayfa</button>
+        </div>
+    </nav>
+
+    <div class="register-container">
+        <h2 style="text-align: center; margin-bottom: 2rem;">Kayıt Ol</h2>
+        <form id="registerForm">
+            <div class="form-group">
+                <label for="name">Ad Soyad</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="email">E-posta (Gmail)</label>
+                <input type="email" id="email" name="email" required>
+                <div class="error-message" id="emailError">Lütfen geçerli bir Gmail adresi giriniz.</div>
+            </div>
+            <div class="form-group">
+                <label for="password">Şifre (En az 1 büyük harf içermelidir)</label>
+                <input type="password" id="password" name="password" required>
+                <div class="error-message" id="passwordError">Şifre en az 1 büyük harf içermelidir.</div>
+            </div>
+            <div class="form-group">
+                <label for="confirmPassword">Şifre Tekrar</label>
+                <input type="password" id="confirmPassword" name="confirmPassword" required>
+                <div class="error-message" id="confirmPasswordError">Şifreler eşleşmiyor!</div>
+            </div>
+            <button type="submit" class="register-btn">Kayıt Ol</button>
+        </form>
+        <div class="login-link">
+            Zaten hesabınız var mı? <a href="login.html">Giriş Yapın</a>
+        </div>
+    </div>
+
+    <script>
+        // Form elemanlarını seç
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const confirmPasswordInput = document.getElementById('confirmPassword');
+        const nameInput = document.getElementById('name');
+        const emailError = document.getElementById('emailError');
+        const passwordError = document.getElementById('passwordError');
+        const confirmPasswordError = document.getElementById('confirmPasswordError');
+
+        // Gmail kontrolü
+        function isValidGmail(email) {
+            return email.endsWith('@gmail.com');
+        }
+
+        // Büyük harf kontrolü
+        function hasUpperCase(password) {
+            return /[A-Z]/.test(password);
+        }
+
+        // Input değişikliklerini dinle
+        emailInput.addEventListener('input', function() {
+            if (!isValidGmail(this.value)) {
+                this.classList.add('error');
+                emailError.style.display = 'block';
+            } else {
+                this.classList.remove('error');
+                emailError.style.display = 'none';
+            }
+        });
+
+        passwordInput.addEventListener('input', function() {
+            if (!hasUpperCase(this.value)) {
+                this.classList.add('error');
+                passwordError.style.display = 'block';
+            } else {
+                this.classList.remove('error');
+                passwordError.style.display = 'none';
+            }
+        });
+
+        confirmPasswordInput.addEventListener('input', function() {
+            if (this.value !== passwordInput.value) {
+                this.classList.add('error');
+                confirmPasswordError.style.display = 'block';
+            } else {
+                this.classList.remove('error');
+                confirmPasswordError.style.display = 'none';
+            }
+        });
+
+        // Form gönderimi
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = nameInput.value;
+            const email = emailInput.value;
+            const password = passwordInput.value;
+            const confirmPassword = confirmPasswordInput.value;
+
+            // Validasyonları kontrol et
+            if (!isValidGmail(email)) {
+                emailInput.classList.add('error');
+                emailError.style.display = 'block';
+                return;
+            }
+
+            if (!hasUpperCase(password)) {
+                passwordInput.classList.add('error');
+                passwordError.style.display = 'block';
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                confirmPasswordInput.classList.add('error');
+                confirmPasswordError.style.display = 'block';
+                return;
+            }
+            // Ad bilgisini localStorage'a kaydet
+            localStorage.setItem('userName', name);
+            // Tüm validasyonlar başarılı
+            console.log('Kayıt denemesi:', { name, email, password });
+            alert('Kayıt başarılı! Giriş yapabilirsiniz.');
+            window.location.href = 'login.html';
+        });
+    </script>
+</body>
+</html> 

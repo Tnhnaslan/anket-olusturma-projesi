@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gelişmiş Anket Oluştur - Online Anket/Poll Sistemi</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body { background: #f7fafd; }
+        .create-poll-container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+        }
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; color: #333; font-weight: 500; }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem;
+        }
+        .form-group textarea { min-height: 80px; resize: vertical; }
+        .questions-list { margin-bottom: 2rem; }
+        .question-card {
+            background: #f8fbff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 1.2rem 1rem 1rem 1rem;
+            margin-bottom: 1.2rem;
+            position: relative;
+        }
+        .question-actions {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+        .question-actions button {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 0.2rem 0.6rem;
+        }
+        .question-actions button:hover { background: #f0f0f0; }
+        .option-list { margin-top: 0.7rem; }
+        .option-item { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
+        .option-item input[type="text"] { flex: 1; }
+        .add-option-btn {
+            background: #e0f2fe;
+            color: #1a73e8;
+            border: none;
+            border-radius: 4px;
+            padding: 0.3rem 0.8rem;
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+        .add-option-btn:hover { background: #bae6fd; }
+        .add-question-btn {
+            width: 100%;
+            background: #1a73e8;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 0.8rem 0;
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            cursor: pointer;
+        }
+        .add-question-btn:hover { background: #1557b0; }
+        .create-poll-btn {
+            width: 100%;
+            padding: 1rem;
+            background-color: #22c55e;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            cursor: pointer;
+        }
+        .create-poll-btn:hover { background: #16a34a; }
+        .required-label { color: #e11d48; font-size: 0.95rem; margin-left: 0.5rem; }
+        @media (max-width: 700px) {
+            .create-poll-container { padding: 1rem; }
+        }
+        .question-card input[type='text'] {
+            width: 100%;
+            padding: 0.7rem 1rem;
+            font-size: 1.08rem;
+            border: 1.5px solid #bcd0ee;
+            border-radius: 6px;
+            margin-top: 0.7rem;
+        }
+        .question-card textarea {
+            width: 100%;
+            min-height: 110px;
+            padding: 0.7rem 1rem;
+            font-size: 1.08rem;
+            border: 1.5px solid #bcd0ee;
+            border-radius: 6px;
+            margin-top: 0.7rem;
+            resize: vertical;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">Online Anket/Poll Sistemi</div>
+        <div class="nav-buttons">
+            <button class="btn btn-secondary" onclick="window.location.href='dashboard.html'">Anketlerime Dön</button>
+        </div>
+    </nav>
+    <div class="create-poll-container">
+        <h2 style="text-align:center;margin-bottom:2rem;">Gelişmiş Anket Oluştur</h2>
+        <form id="createPollForm">
+            <div class="form-group">
+                <label for="pollTitle">Anket Başlığı</label>
+                <input type="text" id="pollTitle" name="pollTitle" required>
+            </div>
+            <div class="form-group">
+                <label for="pollDescription">Anket Açıklaması</label>
+                <textarea id="pollDescription" name="pollDescription" required></textarea>
+            </div>
+            <div class="questions-list" id="questionsList"></div>
+            <button type="button" class="add-question-btn" onclick="addQuestion()">+ Soru Ekle</button>
+            <div style="display:flex;gap:1rem;">
+                <button type="submit" class="create-poll-btn">Anketi Oluştur</button>
+                <button type="button" class="create-poll-btn" style="background:#1a73e8;" onclick="previewSurvey()">Anketi Önizle</button>
+            </div>
+        </form>
+    </div>
+    <div id="previewModal" style="display:none;position:fixed;z-index:1000;left:0;top:0;width:100vw;height:100vh;background:rgba(0,0,0,0.25);align-items:center;justify-content:center;">
+        <div style="background:#fff;max-width:600px;width:95vw;padding:2rem 1.5rem;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.18);position:relative;max-height:90vh;overflow:auto;">
+            <button onclick="closePreview()" style="position:absolute;top:1rem;right:1rem;font-size:1.5rem;background:none;border:none;cursor:pointer;">&times;</button>
+            <div id="previewContent"></div>
+        </div>
+    </div>
+    <script>
+        // Soru tipleri
+        const QUESTION_TYPES = [
+            { value: 'short', label: 'Kısa Yanıt' },
+            { value: 'paragraph', label: 'Paragraf' },
+            { value: 'radio', label: 'Çoktan Seçmeli' },
+            { value: 'checkbox', label: 'Onay Kutusu' },
+            { value: 'dropdown', label: 'Açılır Liste' }
+        ];
+        let questions = [];
+        let savedQuestions = [];
+        function renderQuestions() {
+            const list = document.getElementById('questionsList');
+            list.innerHTML = '';
+            // Kaydedilmiş soruları göster
+            savedQuestions.forEach((q, idx) => {
+                let optionsHtml = '';
+                if(['radio','checkbox','dropdown'].includes(q.type)) {
+                    optionsHtml = `<ul style='margin-top:0.7rem;'>` +
+                        q.options.map(opt => `<li style='margin-bottom:0.3rem;'>${opt}</li>`).join('') +
+                        `</ul>`;
+                } else if(q.type === 'short') {
+                    optionsHtml = `<input type='text' placeholder='Kısa yanıt' style='margin-top:0.7rem;'>`;
+                } else if(q.type === 'paragraph') {
+                    optionsHtml = `<textarea placeholder='Paragraf yanıtı' style='margin-top:0.7rem;'></textarea>`;
+                }
+                list.innerHTML += `
+                <div class='question-card' style='opacity:0.7;'>
+                    <div class='question-actions'>
+                        <button type='button' onclick='removeSavedQuestion(${idx})' title='Sil'>&#128465;</button>
+                    </div>
+                    <div class='form-group'>
+                        <b>${q.title}</b>
+                    </div>
+                    <div class='form-group'>
+                        <span style='font-size:0.97rem;color:#555;'>${QUESTION_TYPES.find(t=>t.value===q.type).label}</span>
+                    </div>
+                    ${optionsHtml}
+                    <div class='form-group'>
+                        <span style='font-size:0.97rem;color:#888;'>${q.required ? 'Zorunlu' : 'İsteğe Bağlı'}</span>
+                    </div>
+                </div>
+                `;
+            });
+            // Düzenlenebilir (henüz kaydedilmemiş) soruları göster
+            questions.forEach((q, idx) => {
+                let optionsHtml = '';
+                if(['radio','checkbox','dropdown'].includes(q.type)) {
+                    optionsHtml = `<div class='option-list' id='optionList${idx}'>` +
+                        q.options.map((opt, oidx) => `
+                            <div class='option-item'>
+                                <input type='text' value='${opt}' oninput='updateOption(${idx},${oidx},this.value)'>
+                                <button type='button' onclick='removeOption(${idx},${oidx})'>&times;</button>
+                            </div>
+                        `).join('') +
+                        `<button type='button' class='add-option-btn' onclick='addOption(${idx})'>+ Seçenek Ekle</button>
+                    </div>`;
+                } else if(q.type === 'short') {
+                    optionsHtml = `<input type='text' placeholder='Kısa yanıt' style='margin-top:0.7rem;'>`;
+                } else if(q.type === 'paragraph') {
+                    optionsHtml = `<textarea placeholder='Paragraf yanıtı' style='margin-top:0.7rem;'></textarea>`;
+                }
+                list.innerHTML += `
+                <div class='question-card'>
+                    <div class='question-actions'>
+                        <button type='button' onclick='removeQuestion(${idx})' title='Sil'>&#128465;</button>
+                        <button type='button' onclick='moveQuestion(${idx},-1)' title='Yukarı'>&#8593;</button>
+                        <button type='button' onclick='moveQuestion(${idx},1)' title='Aşağı'>&#8595;</button>
+                    </div>
+                    <div class='form-group'>
+                        <label>Soru Başlığı <span class='required-label'>*</span></label>
+                        <input type='text' value='${q.title}' oninput='updateQuestionTitle(${idx},this.value)' required>
+                    </div>
+                    <div class='form-group'>
+                        <label>Soru Tipi</label>
+                        <select onchange='updateQuestionType(${idx},this.value)'>
+                            ${QUESTION_TYPES.map(t => `<option value='${t.value}' ${q.type===t.value?'selected':''}>${t.label}</option>`).join('')}
+                        </select>
+                    </div>
+                    ${optionsHtml}
+                    <div class='form-group'>
+                        <label><input type='checkbox' ${q.required?'checked':''} onchange='toggleRequired(${idx},this.checked)'> Zorunlu</label>
+                    </div>
+                    <div class='form-group' style='text-align:right;'>
+                        <button type='button' class='add-option-btn' onclick='saveQuestion(${idx})'>Kaydet</button>
+                    </div>
+                </div>
+                `;
+            });
+        }
+        function addQuestion() {
+            questions.push({
+                title: '',
+                type: 'short',
+                options: [''],
+                required: false
+            });
+            renderQuestions();
+        }
+        function saveQuestion(idx) {
+            const q = questions[idx];
+            if(!q.title.trim()) { alert('Soru başlığı boş olamaz!'); return; }
+            if(['radio','checkbox','dropdown'].includes(q.type)) {
+                if(q.options.some(opt=>!opt.trim())) { alert('Tüm seçenekler doldurulmalı!'); return; }
+            }
+            savedQuestions.push({...q});
+            questions.splice(idx,1);
+            renderQuestions();
+        }
+        function removeSavedQuestion(idx) {
+            savedQuestions.splice(idx,1);
+            renderQuestions();
+        }
+        function removeQuestion(idx) {
+            questions.splice(idx,1);
+            renderQuestions();
+        }
+        function moveQuestion(idx, dir) {
+            const newIdx = idx + dir;
+            if(newIdx<0 || newIdx>=questions.length) return;
+            [questions[idx], questions[newIdx]] = [questions[newIdx], questions[idx]];
+            renderQuestions();
+        }
+        function updateQuestionTitle(idx, val) {
+            questions[idx].title = val;
+        }
+        function updateQuestionType(idx, val) {
+            questions[idx].type = val;
+            if(['radio','checkbox','dropdown'].includes(val)) {
+                if(!questions[idx].options || questions[idx].options.length===0) questions[idx].options = ['',''];
+            } else {
+                questions[idx].options = [''];
+            }
+            renderQuestions();
+        }
+        function addOption(qidx) {
+            questions[qidx].options.push('');
+            renderQuestions();
+        }
+        function removeOption(qidx, oidx) {
+            if(questions[qidx].options.length>1) {
+                questions[qidx].options.splice(oidx,1);
+                renderQuestions();
+            }
+        }
+        function updateOption(qidx, oidx, val) {
+            questions[qidx].options[oidx] = val;
+        }
+        function toggleRequired(idx, checked) {
+            questions[idx].required = checked;
+        }
+        // Başlangıçta bir soru ekle
+        if(questions.length===0) addQuestion();
+        // Form submit
+        document.getElementById('createPollForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const title = document.getElementById('pollTitle').value;
+            const description = document.getElementById('pollDescription').value;
+            if(savedQuestions.length === 0) {
+                alert('En az bir soru kaydedin!');
+                return;
+            }
+            // Anketi kaydet
+            const pollData = {
+                title,
+                description,
+                questions: savedQuestions,
+                date: new Date().toLocaleDateString('tr-TR')
+            };
+            let polls = JSON.parse(localStorage.getItem('polls') || '[]');
+            polls.unshift(pollData);
+            localStorage.setItem('polls', JSON.stringify(polls));
+            localStorage.setItem('userHasSurveys', 'true');
+            alert('Anket başarıyla oluşturuldu!');
+            window.location.href = 'dashboard.html';
+        });
+        function previewSurvey() {
+            if(savedQuestions.length === 0) {
+                alert('Önizleme için en az bir soru kaydedin!');
+                return;
+            }
+            const pollTitle = document.getElementById('pollTitle').value || 'Anket Başlığı';
+            let html = `<h2 style='margin-bottom:0.5rem;'>${pollTitle}</h2>`;
+            html += `<h3 style='margin-bottom:1.2rem;'>Anket Önizleme</h3>`;
+            html += `<form onsubmit='event.preventDefault();alert("Cevaplarınız kaydedilmedi, bu sadece önizlemedir.")'>`;
+            savedQuestions.forEach((q, idx) => {
+                html += `<div style='margin-bottom:1.5rem;'>`;
+                html += `<div style='font-weight:500;margin-bottom:0.5rem;'>${q.title} ${q.required ? '<span style=\'color:#e11d48\'>*</span>' : ''}</div>`;
+                if(q.type === 'short') {
+                    html += `<input type='text' style='width:100%;padding:0.7rem 1rem;font-size:1.08rem;border:1.5px solid #bcd0ee;border-radius:6px;'>`;
+                } else if(q.type === 'paragraph') {
+                    html += `<textarea style='width:100%;min-height:110px;padding:0.7rem 1rem;font-size:1.08rem;border:1.5px solid #bcd0ee;border-radius:6px;resize:vertical;'></textarea>`;
+                } else if(q.type === 'radio') {
+                    q.options.forEach(opt => {
+                        html += `<label style='display:block;margin-bottom:0.4rem;'><input type='radio' name='q${idx}'> ${opt}</label>`;
+                    });
+                } else if(q.type === 'checkbox') {
+                    q.options.forEach(opt => {
+                        html += `<label style='display:block;margin-bottom:0.4rem;'><input type='checkbox' name='q${idx}'> ${opt}</label>`;
+                    });
+                } else if(q.type === 'dropdown') {
+                    html += `<select style='width:100%;padding:0.7rem 1rem;font-size:1.08rem;border:1.5px solid #bcd0ee;border-radius:6px;'>`;
+                    q.options.forEach(opt => {
+                        html += `<option>${opt}</option>`;
+                    });
+                    html += `</select>`;
+                }
+                html += `</div>`;
+            });
+            html += `<button type='submit' class='create-poll-btn' style='margin-top:1rem;background:#22c55e;'>Cevapları Gönder (Demo)</button>`;
+            html += `</form>`;
+            document.getElementById('previewContent').innerHTML = html;
+            document.getElementById('previewModal').style.display = 'flex';
+        }
+        function closePreview() {
+            document.getElementById('previewModal').style.display = 'none';
+        }
+    </script>
+</body>
+</html> 

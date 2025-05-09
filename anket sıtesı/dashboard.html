@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel - Online Anket/Poll Sistemi</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            background: #f7fafd;
+        }
+        .dashboard-container {
+            max-width: 1100px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+        }
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: #1a73e8;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            position: relative;
+            user-select: none;
+        }
+        .avatar-menu {
+            display: none;
+            position: absolute;
+            top: 54px;
+            right: 0;
+            background: #fff;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            min-width: 160px;
+            z-index: 10;
+        }
+        .avatar-menu.active {
+            display: block;
+        }
+        .avatar-menu ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        .avatar-menu li {
+            padding: 12px 18px;
+            cursor: pointer;
+            transition: background 0.2s;
+            color: #222;
+            background: #fff;
+            font-weight: 400;
+            font-family: inherit;
+            font-size: 1rem;
+        }
+        .avatar-menu li:hover {
+            background: #f0f0f0;
+        }
+        .dashboard-title {
+            font-size: 2.2rem;
+            font-weight: 600;
+            color: #183153;
+        }
+        .dashboard-subtitle {
+            font-size: 1.1rem;
+            color: #4a5568;
+            margin-bottom: 2rem;
+        }
+        .surveys-row {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .survey-card {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 1.5rem 1.2rem;
+            flex: 1;
+            min-width: 220px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .survey-card h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #222;
+        }
+        .survey-card .survey-date {
+            color: #6b7280;
+            font-size: 0.98rem;
+            margin-bottom: 1.2rem;
+        }
+        .survey-card .see-results {
+            background: #22c55e;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 0.5rem 1.2rem;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: auto;
+        }
+        .stats-panel {
+            background: linear-gradient(135deg, #0f3443 0%, #34e89e 100%);
+            color: #fff;
+            border-radius: 12px;
+            padding: 1.5rem 1.2rem;
+            min-width: 220px;
+            display: flex;
+            flex-direction: column;
+            gap: 0.7rem;
+            font-size: 1.05rem;
+        }
+        .stats-panel .stat-label {
+            opacity: 0.85;
+        }
+        .new-survey-box, .empty-survey-box {
+            border: 2px solid #1a73e8;
+            border-radius: 12px;
+            padding: 2.5rem 1.2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-width: 220px;
+            cursor: pointer;
+            background: #f8fbff;
+            transition: box-shadow 0.2s;
+        }
+        .new-survey-box:hover, .empty-survey-box:hover {
+            box-shadow: 0 2px 12px rgba(26,115,232,0.08);
+        }
+        .new-survey-box .plus, .empty-survey-box .plus {
+            font-size: 2.2rem;
+            color: #1a73e8;
+            margin-bottom: 0.5rem;
+        }
+        .empty-survey-message {
+            font-size: 1.2rem;
+            color: #333;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        @media (max-width: 900px) {
+            .surveys-row {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="dashboard-header">
+            <div class="user-info">
+                <span id="welcomeText" style="font-size:1.1rem;color:#222;">Hoş geldin</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:1rem;">
+                <div class="avatar" id="avatar">A
+                    <div class="avatar-menu" id="avatarMenu">
+                        <ul>
+                            <li onclick="alert('Profil sayfası yakında!')">Profil</li>
+                            <li onclick="logout()">Çıkış Yap</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="dashboard-title" id="dashboardTitle">Hoş geldin, anketlerine göz atabilir<br>veya yenisini oluşturabilirsin.</div>
+        <div class="dashboard-subtitle"></div>
+        <div id="surveysSection">
+            <!-- Anketler veya boş mesaj buraya gelecek -->
+        </div>
+    </div>
+    <div id="pollModal" style="display:none;position:fixed;z-index:1000;left:0;top:0;width:100vw;height:100vh;background:rgba(0,0,0,0.25);align-items:center;justify-content:center;">
+        <div style="background:#fff;max-width:600px;width:95vw;padding:2rem 1.5rem;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.18);position:relative;max-height:90vh;overflow:auto;">
+            <button onclick="closePollModal()" style="position:absolute;top:1rem;right:1rem;font-size:1.5rem;background:none;border:none;cursor:pointer;">&times;</button>
+            <div id="pollModalContent"></div>
+        </div>
+    </div>
+    <script>
+        // Kullanıcı adı örneği (kayıt/girişte alınan değeri buraya aktarabilirsiniz)
+        var userName = localStorage.getItem('userName') || 'Kullanıcı';
+        var firstLetter = userName.trim().charAt(0).toUpperCase();
+        document.getElementById('welcomeText').textContent = 'Hoş geldin ' + userName;
+        // Avatar içeriğini innerHTML ile güncelle ve menüyü tekrar ekle
+        var avatar = document.getElementById('avatar');
+        var avatarMenu = document.getElementById('avatarMenu');
+        avatar.innerHTML = firstLetter;
+        avatar.appendChild(avatarMenu);
+        document.getElementById('dashboardTitle').innerHTML = 'Hoş geldin ' + userName + ', anketlerine göz atabilir<br>veya yenisini oluşturabilirsin.';
+        // Avatar harfi ve menü
+        avatar.addEventListener('click', function(e) {
+            avatarMenu.classList.toggle('active');
+            e.stopPropagation();
+        });
+        document.addEventListener('click', function() {
+            avatarMenu.classList.remove('active');
+        });
+        // Çıkış fonksiyonu
+        function logout() {
+            localStorage.removeItem('userName');
+            window.location.href = 'index.html';
+        }
+        // Anketler (örnek: yeni kullanıcı için boş)
+        var userHasSurveys = (localStorage.getItem('userHasSurveys') === 'true');
+        var surveysSection = document.getElementById('surveysSection');
+        if (!userHasSurveys) {
+            surveysSection.innerHTML = `
+                <div class="empty-survey-box" id="newSurveyBox">
+                    <div class="empty-survey-message">Henüz hiç anket oluşturmadınız.<br>Hemen yeni bir anket oluşturun!</div>
+                    <div class="plus">+</div>
+                    <div style="font-size:1.1rem;color:#1a73e8;font-weight:500;">+ Yeni Anket Oluştur</div>
+                </div>
+            `;
+            setTimeout(function() {
+                var newSurveyBox = document.getElementById('newSurveyBox');
+                if (newSurveyBox) {
+                    newSurveyBox.onclick = function() {
+                        window.location.href = 'create-poll.html';
+                    };
+                }
+            }, 0);
+        } else {
+            // Tüm anketleri göster
+            var polls = JSON.parse(localStorage.getItem('polls') || '[]');
+            var cardsHtml = polls.map(function(poll, pollIdx) {
+                return `
+                    <div class=\"survey-card\" style=\"position:relative;\">
+                        <button onclick=\"deletePoll(${pollIdx})\" title=\"Sil\" style=\"position:absolute;top:0.7rem;right:0.7rem;background:none;border:none;font-size:1.3rem;color:#e11d48;cursor:pointer;z-index:2;\">&#128465;</button>
+                        <h3>${poll.title}</h3>
+                        <div class=\"survey-date\">${poll.date}</div>
+                        <button class=\"see-results\">Sonuçları Gör</button>
+                        <button class=\"see-results\" style=\"background:#1a73e8;margin-top:0.5rem;\" onclick=\"showPoll(${pollIdx})\">Anketi Göster</button>
+                    </div>
+                `;
+            }).join('');
+            surveysSection.innerHTML = `
+                <div class=\"surveys-row\" style=\"flex-direction:column;gap:1.5rem;\">
+                    ${cardsHtml}
+                    <div class=\"stats-panel\">
+                        <div><span class=\"stat-label\">Toplam Anket</span>: ${polls.length}</div>
+                        <div><span class=\"stat-label\">Toplam Yanıt</span>: 0</div>
+                        <div><span class=\"stat-label\">En Çok Yanıt Alan</span>:<br> ${polls[0] ? polls[0].title : ''}</div>
+                    </div>
+                    <div class=\"new-survey-box\" id=\"newSurveyBox2\">
+                        <div class=\"plus\">+</div>
+                        <div>+ Yeni Anket Oluştur</div>
+                    </div>
+                </div>
+            `;
+            setTimeout(function() {
+                var newSurveyBox2 = document.getElementById('newSurveyBox2');
+                if (newSurveyBox2) {
+                    newSurveyBox2.onclick = function() {
+                        window.location.href = 'create-poll.html';
+                    };
+                }
+            }, 0);
+        }
+        function showPoll(idx) {
+            var polls = JSON.parse(localStorage.getItem('polls') || '[]');
+            var poll = polls[idx];
+            if(!poll) return;
+            let html = `<h2 style='margin-bottom:0.5rem;'>${poll.title}</h2>`;
+            poll.questions.forEach((q, qidx) => {
+                html += `<div style='margin-bottom:1.5rem;'>`;
+                html += `<div style='font-weight:500;margin-bottom:0.5rem;'>${q.title} ${q.required ? '<span style=\'color:#e11d48\'>*</span>' : ''}</div>`;
+                if(q.type === 'short') {
+                    html += `<input type='text' disabled style='width:100%;padding:0.7rem 1rem;font-size:1.08rem;border:1.5px solid #bcd0ee;border-radius:6px;background:#f3f4f6;'>`;
+                } else if(q.type === 'paragraph') {
+                    html += `<textarea disabled style='width:100%;min-height:110px;padding:0.7rem 1rem;font-size:1.08rem;border:1.5px solid #bcd0ee;border-radius:6px;resize:vertical;background:#f3f4f6;'></textarea>`;
+                } else if(q.type === 'radio') {
+                    q.options.forEach(opt => {
+                        html += `<label style='display:block;margin-bottom:0.4rem;'><input type='radio' disabled> ${opt}</label>`;
+                    });
+                } else if(q.type === 'checkbox') {
+                    q.options.forEach(opt => {
+                        html += `<label style='display:block;margin-bottom:0.4rem;'><input type='checkbox' disabled> ${opt}</label>`;
+                    });
+                } else if(q.type === 'dropdown') {
+                    html += `<select disabled style='width:100%;padding:0.7rem 1rem;font-size:1.08rem;border:1.5px solid #bcd0ee;border-radius:6px;background:#f3f4f6;'>`;
+                    q.options.forEach(opt => {
+                        html += `<option>${opt}</option>`;
+                    });
+                    html += `</select>`;
+                }
+                html += `</div>`;
+            });
+            document.getElementById('pollModalContent').innerHTML = html;
+            document.getElementById('pollModal').style.display = 'flex';
+        }
+        function closePollModal() {
+            document.getElementById('pollModal').style.display = 'none';
+        }
+        function deletePoll(idx) {
+            if(!confirm('Bu anketi silmek istediğinize emin misiniz?')) return;
+            var polls = JSON.parse(localStorage.getItem('polls') || '[]');
+            polls.splice(idx,1);
+            localStorage.setItem('polls', JSON.stringify(polls));
+            if(polls.length === 0) localStorage.setItem('userHasSurveys', 'false');
+            location.reload();
+        }
+    </script>
+</body>
+</html> 
